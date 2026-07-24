@@ -212,37 +212,37 @@ class SensitivityAnalysisTest {
             var componentLoadFlowStatus = stateStatus.getComponentsLoadFlowStatusList().iterator().next();
             int resultCase = contingencyIndex % 5;
             switch (resultCase) {
-                case 0 :
+                case 0:
                     assertEquals(SensitivityAnalysisResult.Status.SUCCESS, stateStatus.getStatus());
                     assertEquals(LoadFlowResult.ComponentResult.Status.CONVERGED, componentLoadFlowStatus.getFirst().status());
                     assertEquals(0, componentLoadFlowStatus.getSecond());
                     assertEquals(0, componentLoadFlowStatus.getThird());
                     break;
-                case 1 :
+                case 1:
                     assertEquals(SensitivityAnalysisResult.Status.SUCCESS, stateStatus.getStatus());
                     assertEquals(LoadFlowResult.ComponentResult.Status.NO_CALCULATION, componentLoadFlowStatus.getFirst().status());
                     assertEquals(0, componentLoadFlowStatus.getSecond());
                     assertEquals(0, componentLoadFlowStatus.getThird());
                     break;
-                case 2 :
+                case 2:
                     assertEquals(SensitivityAnalysisResult.Status.NO_IMPACT, stateStatus.getStatus());
                     assertEquals(LoadFlowResult.ComponentResult.Status.CONVERGED, componentLoadFlowStatus.getFirst().status());
                     assertEquals(0, componentLoadFlowStatus.getSecond());
                     assertEquals(0, componentLoadFlowStatus.getThird());
                     break;
-                case 3 :
+                case 3:
                     assertEquals(SensitivityAnalysisResult.Status.FAILURE, stateStatus.getStatus());
                     assertEquals(LoadFlowResult.ComponentResult.Status.MAX_ITERATION_REACHED, componentLoadFlowStatus.getFirst().status());
                     assertEquals(0, componentLoadFlowStatus.getSecond());
                     assertEquals(0, componentLoadFlowStatus.getThird());
                     break;
-                case 4 :
+                case 4:
                     assertEquals(SensitivityAnalysisResult.Status.FAILURE, stateStatus.getStatus());
                     assertEquals(LoadFlowResult.ComponentResult.Status.FAILED, componentLoadFlowStatus.getFirst().status());
                     assertEquals(0, componentLoadFlowStatus.getSecond());
                     assertEquals(0, componentLoadFlowStatus.getThird());
                     break;
-                default :
+                default:
                     fail();
             }
             contingencyIndex++;

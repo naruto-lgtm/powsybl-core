@@ -21,9 +21,9 @@ import com.powsybl.loadflow.LoadFlowResult;
 import com.powsybl.sensitivity.json.SensitivityJsonModule;
 import com.powsybl.tools.Tool;
 import com.powsybl.tools.test.AbstractToolTest;
+import org.jgrapht.alg.util.Triple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.jgrapht.alg.util.Triple;
 
 import java.io.IOException;
 import java.io.Reader;

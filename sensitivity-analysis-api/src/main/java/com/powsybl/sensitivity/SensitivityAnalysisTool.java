@@ -28,6 +28,7 @@ import com.powsybl.contingency.strategy.OperatorStrategy;
 import com.powsybl.contingency.strategy.OperatorStrategyList;
 import com.powsybl.iidm.network.ImportConfig;
 import com.powsybl.iidm.network.Network;
+import com.powsybl.iidm.network.tools.ConversionToolUtils;
 import com.powsybl.sensitivity.json.JsonSensitivityAnalysisParameters;
 import com.powsybl.sensitivity.json.SensitivityJsonModule;
 import com.powsybl.tools.Command;
@@ -198,7 +199,7 @@ public class SensitivityAnalysisTool implements Tool {
         Path factorsFile = context.getFileSystem().getPath(line.getOptionValue(FACTORS_FILE_OPTION));
 
         context.getOutputStream().println("Loading network '" + caseFile + "'");
-        Properties inputParams = readProperties(line, OptionType.IMPORT, context);
+        Properties inputParams = readProperties(line, ConversionToolUtils.OptionType.IMPORT, context);
         Network network = Network.read(caseFile, context.getShortTimeExecutionComputationManager(), ImportConfig.load(), inputParams);
         if (network == null) {
             throw new PowsyblException("Case '" + caseFile + "' not found");
