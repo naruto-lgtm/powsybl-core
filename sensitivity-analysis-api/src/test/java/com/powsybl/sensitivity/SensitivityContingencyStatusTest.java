@@ -10,7 +10,6 @@ package com.powsybl.sensitivity;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.powsybl.loadflow.LoadFlowResult;
-import org.jgrapht.alg.util.Triple;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -71,7 +70,7 @@ class SensitivityContingencyStatusTest {
 
             assertEquals("ID_001", stateStatus.getState().contingencyId());
             assertEquals(1, stateStatus.getComponentsLoadFlowStatusList().size());
-            SensitivityAnalysisResult.SensitivityStateStatus.ComponentLoadFlowStatus triple =
+            SensitivityAnalysisResult.SensitivityStateStatus.ComponentStatus triple =
                     stateStatus.getComponentsLoadFlowStatusList().getFirst();
             assertEquals(LoadFlowResult.ComponentResult.Status.CONVERGED, triple.status().status());
             assertEquals("TestConvergence", triple.status().statusText());
@@ -101,7 +100,7 @@ class SensitivityContingencyStatusTest {
 
             assertEquals(SensitivityState.PRE_CONTINGENCY, stateStatus.getState());
             assertEquals(1, stateStatus.getComponentsLoadFlowStatusList().size());
-            SensitivityAnalysisResult.SensitivityStateStatus.ComponentLoadFlowStatus triple =
+            SensitivityAnalysisResult.SensitivityStateStatus.ComponentStatus triple =
                     stateStatus.getComponentsLoadFlowStatusList().getFirst();
             assertEquals(LoadFlowResult.ComponentResult.Status.CONVERGED, triple.status().status());
             assertEquals("TestStatusText", triple.status().statusText());

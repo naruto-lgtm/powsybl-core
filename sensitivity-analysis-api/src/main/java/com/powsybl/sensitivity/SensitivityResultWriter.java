@@ -46,6 +46,6 @@ public interface SensitivityResultWriter {
      * @param numCC index of connected component, -1 if not applicable
      * @param numCS index of synchronous component, -1 if not applicable
      */
-    void writeStateStatus(int contingencyIndex, int operatorStrategyIndex, SensitivityAnalysisResult.Status status,
+    void writeStateStatus(int contingencyIndex, int operatorStrategyIndex,
                           SensitivityAnalysisResult.LoadFlowStatus loadFlowStatus, int numCC, int numCS);
 }

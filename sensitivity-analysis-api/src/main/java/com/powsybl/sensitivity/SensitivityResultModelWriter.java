@@ -45,7 +45,7 @@ public class SensitivityResultModelWriter implements SensitivityResultWriter {
     }
 
     @Override
-    public void writeStateStatus(int contingencyIndex, int operatorStrategyIndex, SensitivityAnalysisResult.Status status,
+    public void writeStateStatus(int contingencyIndex, int operatorStrategyIndex,
                                  SensitivityAnalysisResult.LoadFlowStatus loadFlowStatus, int numCC, int numCS) {
         SensitivityState state = new SensitivityState(
                 contingencyIndex != -1 ? contingencies.get(contingencyIndex).getId() : null,

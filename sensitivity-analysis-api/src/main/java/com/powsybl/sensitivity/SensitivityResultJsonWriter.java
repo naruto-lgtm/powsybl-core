@@ -51,8 +51,7 @@ public class SensitivityResultJsonWriter implements SensitivityResultWriter, Aut
     }
 
     @Override
-    public void writeStateStatus(int contingencyIndex, int operatorStrategyIndex, SensitivityAnalysisResult.Status status,
-                                 SensitivityAnalysisResult.LoadFlowStatus loadFlowStatus, int numCC, int numCS) {
+    public void writeStateStatus(int contingencyIndex, int operatorStrategyIndex, SensitivityAnalysisResult.LoadFlowStatus loadFlowStatus, int numCC, int numCS) {
         SensitivityState state = new SensitivityState(
                 contingencyIndex != -1 ? contingencies.get(contingencyIndex).getId() : null,
                 operatorStrategyIndex != -1 ? operatorStrategies.get(operatorStrategyIndex).getId() : null);

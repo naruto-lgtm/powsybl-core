@@ -15,6 +15,7 @@ import com.powsybl.contingency.Contingency;
 import com.powsybl.contingency.ContingencyContext;
 import com.powsybl.contingency.strategy.OperatorStrategy;
 import com.powsybl.contingency.strategy.condition.TrueCondition;
+import com.powsybl.loadflow.LoadFlowResult;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -39,9 +40,9 @@ class SensitivityResultJsonWriterTest {
         try (Writer writer = new StringWriter()) {
             try (JsonGenerator generator = JsonUtil.createJsonFactory().createGenerator(writer).useDefaultPrettyPrinter();
                 SensitivityResultJsonWriter sensiWriter = new SensitivityResultJsonWriter(generator, contingencies, operatorStrategies)) {
-                sensiWriter.writeStateStatus(-1, -1, SensitivityAnalysisResult.Status.SUCCESS, null, -1, -1);
+                sensiWriter.writeStateStatus(-1, -1, new SensitivityAnalysisResult.LoadFlowStatus(LoadFlowResult.ComponentResult.Status.CONVERGED, ""), 0, 0);
                 sensiWriter.writeSensitivityValue(0, -1, -1, 1d, 2d);
-                sensiWriter.writeStateStatus(0, 0, SensitivityAnalysisResult.Status.SUCCESS, null, -1, -1);
+                sensiWriter.writeStateStatus(0, 0, new SensitivityAnalysisResult.LoadFlowStatus(LoadFlowResult.ComponentResult.Status.CONVERGED, ""), 0, 0);
                 sensiWriter.writeSensitivityValue(1, 0, 0, 3d, 4d);
             }
             writer.flush();

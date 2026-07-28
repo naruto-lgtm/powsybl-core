@@ -83,7 +83,7 @@ public class SensitivityAnalysisResult {
 
     public static class SensitivityStateStatus {
 
-        public record ComponentLoadFlowStatus(LoadFlowStatus status, int numCC, int numSC) { }
+        public record ComponentStatus(LoadFlowStatus status, int numCC, int numSC) { }
 
         static final String COMPONENTS_LOADFLOW_STATUSES = "componentsLoadFlowStatuses";
         static final String LOAD_FLOW_STATUS = "loadFlowStatus";
@@ -96,7 +96,7 @@ public class SensitivityAnalysisResult {
         /**
          * Per-component load flow status (one entry per (numCC, numCS) for which a load flow has run).
          */
-        private final List<ComponentLoadFlowStatus> componentsLoadFlowStatusList;
+        private final List<ComponentStatus> componentsLoadFlowStatusList;
 
         public SensitivityState getState() {
             return state;
@@ -112,12 +112,6 @@ public class SensitivityAnalysisResult {
                     case CONVERGED -> {
                         return Status.SUCCESS;
                     }
-                    case MAX_ITERATION_REACHED -> {
-                        return Status.FAILURE;
-                    }
-                    case FAILED -> {
-                        return Status.FAILURE;
-                    }
                     case NO_CALCULATION -> {
                         return Status.NO_IMPACT;
                     }
@@ -130,11 +124,11 @@ public class SensitivityAnalysisResult {
             }
         }
 
-        public List<ComponentLoadFlowStatus> getComponentsLoadFlowStatusList() {
+        public List<ComponentStatus> getComponentsLoadFlowStatusList() {
             return componentsLoadFlowStatusList;
         }
 
-        public SensitivityStateStatus(SensitivityState state, List<ComponentLoadFlowStatus> statusList) {
+        public SensitivityStateStatus(SensitivityState state, List<ComponentStatus> statusList) {
             this.state = Objects.requireNonNull(state);
             this.componentsLoadFlowStatusList = new ArrayList<>(statusList);
         }
@@ -144,17 +138,14 @@ public class SensitivityAnalysisResult {
          * @return
          */
         public SensitivityStateStatus(SensitivityState state, Status status) {
-            this(state, List.of(new ComponentLoadFlowStatus(
-                    new LoadFlowStatus(ToLoadFlowStatus(status), ""), -1, -1)));
+            this(state, List.of(new ComponentStatus(
+                    new LoadFlowStatus(toLoadFlowStatus(status), ""), -1, -1)));
         }
 
-        private static LoadFlowResult.ComponentResult.Status ToLoadFlowStatus(Status status) {
+        private static LoadFlowResult.ComponentResult.Status toLoadFlowStatus(Status status) {
             switch (status) {
                 case SUCCESS -> {
                     return LoadFlowResult.ComponentResult.Status.CONVERGED;
-                }
-                case FAILURE -> {
-                    return LoadFlowResult.ComponentResult.Status.FAILED;
                 }
                 case NO_IMPACT -> {
                     return LoadFlowResult.ComponentResult.Status.NO_CALCULATION;
@@ -166,7 +157,7 @@ public class SensitivityAnalysisResult {
         }
 
         public void addComponentLoadFlowStatus(LoadFlowStatus loadFlowStatus, int numCC, int numCS) {
-            componentsLoadFlowStatusList.add(new ComponentLoadFlowStatus(loadFlowStatus, numCC, numCS));
+            componentsLoadFlowStatusList.add(new ComponentStatus(loadFlowStatus, numCC, numCS));
         }
 
         public static void writeJson(JsonGenerator jsonGenerator, SensitivityStateStatus stateStatus) {
@@ -174,7 +165,7 @@ public class SensitivityAnalysisResult {
         }
 
         public static void writeJson(JsonGenerator jsonGenerator, SensitivityState state,
-                                     List<ComponentLoadFlowStatus> componentsLoadFlowStatusList) {
+                                     List<ComponentStatus> componentsLoadFlowStatusList) {
             try {
                 jsonGenerator.writeStartObject();
                 if (state.contingencyId() != null) {
@@ -185,12 +176,12 @@ public class SensitivityAnalysisResult {
                 }
                 if (componentsLoadFlowStatusList != null && !componentsLoadFlowStatusList.isEmpty()) {
                     jsonGenerator.writeArrayFieldStart(COMPONENTS_LOADFLOW_STATUSES);
-                    for (ComponentLoadFlowStatus componentLoadFlowStatus : componentsLoadFlowStatusList) {
+                    for (ComponentStatus componentStatus : componentsLoadFlowStatusList) {
                         jsonGenerator.writeStartObject();
-                        jsonGenerator.writeStringField(LOAD_FLOW_STATUS, componentLoadFlowStatus.status().status().toString());
-                        jsonGenerator.writeStringField(LOAD_FLOW_STATUS_DESCRIPTION, componentLoadFlowStatus.status().statusText());
-                        jsonGenerator.writeNumberField(NUM_CC, componentLoadFlowStatus.numCC());
-                        jsonGenerator.writeNumberField(NUM_CS, componentLoadFlowStatus.numSC());
+                        jsonGenerator.writeStringField(LOAD_FLOW_STATUS, componentStatus.status().status().toString());
+                        jsonGenerator.writeStringField(LOAD_FLOW_STATUS_DESCRIPTION, componentStatus.status().statusText());
+                        jsonGenerator.writeNumberField(NUM_CC, componentStatus.numCC());
+                        jsonGenerator.writeNumberField(NUM_CS, componentStatus.numSC());
                         jsonGenerator.writeEndObject();
                     }
                     jsonGenerator.writeEndArray();
@@ -205,7 +196,7 @@ public class SensitivityAnalysisResult {
             private String contingencyId;
             private String operatorStrategyId;
             private Status status;
-            private List<SensitivityAnalysisResult.SensitivityStateStatus.ComponentLoadFlowStatus> componentsLoadFlowStatusList;
+            private List<ComponentStatus> componentsLoadFlowStatusList;
         }
 
         public static SensitivityStateStatus parseJson(JsonParser parser, String version) {
@@ -265,11 +256,11 @@ public class SensitivityAnalysisResult {
             }
         }
 
-        private static List<SensitivityAnalysisResult.SensitivityStateStatus.ComponentLoadFlowStatus> parseComponentLoadFlowStatuses(JsonParser parser) throws IOException {
+        private static List<ComponentStatus> parseComponentLoadFlowStatuses(JsonParser parser) throws IOException {
             if (parser.nextToken() != JsonToken.START_ARRAY) {
                 throw new PowsyblException("Expected start of array for component loadflow statuses");
             }
-            List<SensitivityAnalysisResult.SensitivityStateStatus.ComponentLoadFlowStatus> statuses = new ArrayList<>();
+            List<ComponentStatus> statuses = new ArrayList<>();
             while (parser.nextToken() != JsonToken.END_ARRAY) {
                 if (parser.currentToken() == JsonToken.START_OBJECT) {
                     statuses.add(parseSingleComponentStatus(parser));
@@ -278,7 +269,7 @@ public class SensitivityAnalysisResult {
             return statuses;
         }
 
-        private static SensitivityAnalysisResult.SensitivityStateStatus.ComponentLoadFlowStatus parseSingleComponentStatus(JsonParser parser) throws IOException {
+        private static ComponentStatus parseSingleComponentStatus(JsonParser parser) throws IOException {
             String statusStr = null;
             String descStr = null;
             int numCC = 0;
@@ -295,7 +286,7 @@ public class SensitivityAnalysisResult {
                 }
             }
             LoadFlowStatus lfs = new LoadFlowStatus(LoadFlowResult.ComponentResult.Status.valueOf(statusStr), descStr);
-            return new SensitivityAnalysisResult.SensitivityStateStatus.ComponentLoadFlowStatus(lfs, numCC, numCS);
+            return new ComponentStatus(lfs, numCC, numCS);
         }
     }
 

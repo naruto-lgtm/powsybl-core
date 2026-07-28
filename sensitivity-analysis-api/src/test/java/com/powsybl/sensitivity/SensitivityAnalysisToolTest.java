@@ -21,7 +21,6 @@ import com.powsybl.loadflow.LoadFlowResult;
 import com.powsybl.sensitivity.json.SensitivityJsonModule;
 import com.powsybl.tools.Tool;
 import com.powsybl.tools.test.AbstractToolTest;
-import org.jgrapht.alg.util.Triple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -148,7 +147,7 @@ class SensitivityAnalysisToolTest extends AbstractToolTest {
                 .filter(s -> "NHV1_NHV2_2".equals(s.get("contingencyId")))
                 .findFirst()
                 .orElseThrow();
-        var pcStatus = ((ArrayList<?>)postContingencyStatus.get("componentsLoadFlowStatuses")).get(0);
+        var pcStatus = ((ArrayList<?>) postContingencyStatus.get("componentsLoadFlowStatuses")).get(0);
         assertEquals("CONVERGED", ((HashMap<String, String>) pcStatus).get("loadFlowStatus"));
 
         @SuppressWarnings("unchecked")
@@ -189,9 +188,9 @@ class SensitivityAnalysisToolTest extends AbstractToolTest {
         assertTrue(Files.exists(outputContingencyStatusCsvFile));
         String outputContingencyStatusCsvRef = TestUtil.normalizeLineSeparator(String.join(System.lineSeparator(),
                 "Sensitivity analysis status result",
-                "Contingency ID;Operator strategy ID;Status;Loadflow Status;Loadflow Status Description;Connected component;Synchronous component",
-                ";;SUCCESS;CONVERGED;testStatusText;0;1",
-                "NHV1_NHV2_2;;SUCCESS;CONVERGED;;0;0")
+                "Contingency ID;Operator strategy ID;Loadflow Status;Loadflow Status Description;Connected component;Synchronous component",
+                ";;CONVERGED;testStatusText;0;1",
+                "NHV1_NHV2_2;;CONVERGED;;0;0")
                 + System.lineSeparator());
         assertEquals(outputContingencyStatusCsvRef, TestUtil.normalizeLineSeparator(Files.readString(outputContingencyStatusCsvFile)));
     }
@@ -290,7 +289,7 @@ class SensitivityAnalysisToolTest extends AbstractToolTest {
         assertNull(postStatus.getState().operatorStrategyId());
         assertEquals(SensitivityAnalysisResult.Status.SUCCESS, postStatus.getStatus());
         assertEquals(1, preStatus.getComponentsLoadFlowStatusList().size());
-        SensitivityAnalysisResult.SensitivityStateStatus.ComponentLoadFlowStatus preComponent = preStatus.getComponentsLoadFlowStatusList().getFirst();
+        SensitivityAnalysisResult.SensitivityStateStatus.ComponentStatus preComponent = preStatus.getComponentsLoadFlowStatusList().getFirst();
         assertEquals(LoadFlowResult.ComponentResult.Status.CONVERGED, preComponent.status().status());
         assertEquals("testStatusText", preComponent.status().statusText());
         assertEquals(0, preComponent.numCC());

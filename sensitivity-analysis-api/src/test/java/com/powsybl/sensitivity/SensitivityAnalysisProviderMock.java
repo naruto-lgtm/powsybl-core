@@ -43,25 +43,25 @@ public class SensitivityAnalysisProviderMock implements SensitivityAnalysisProvi
         int[] factorIndex = new int[1];
         factorReader.read((functionType, functionId, variableType, variableId, variableSet, contingencyContext) ->
             readSensitivityFactor(resultWriter, contingencies, factorIndex, reportNode, functionId, contingencyContext));
-        resultWriter.writeStateStatus(-1, -1, SensitivityAnalysisResult.Status.SUCCESS,
+        resultWriter.writeStateStatus(-1, -1,
                 new SensitivityAnalysisResult.LoadFlowStatus(LoadFlowResult.ComponentResult.Status.CONVERGED, "testStatusText"), 0, 1);
         for (int contingencyIndex = 0; contingencyIndex < contingencies.size(); contingencyIndex++) {
             int resultCase = contingencyIndex % 5;
             switch (resultCase) {
                 case 0 ->
-                    resultWriter.writeStateStatus(contingencyIndex, -1, SensitivityAnalysisResult.Status.SUCCESS,
+                    resultWriter.writeStateStatus(contingencyIndex, -1,
                             new SensitivityAnalysisResult.LoadFlowStatus(LoadFlowResult.ComponentResult.Status.CONVERGED, ""), 0, 0);
                 case 1 ->
-                    resultWriter.writeStateStatus(contingencyIndex, -1, SensitivityAnalysisResult.Status.SUCCESS,
+                    resultWriter.writeStateStatus(contingencyIndex, -1,
                             new SensitivityAnalysisResult.LoadFlowStatus(LoadFlowResult.ComponentResult.Status.NO_CALCULATION, ""), 0, 0);
                 case 2 ->
-                    resultWriter.writeStateStatus(contingencyIndex, -1, SensitivityAnalysisResult.Status.NO_IMPACT,
+                    resultWriter.writeStateStatus(contingencyIndex, -1,
                             new SensitivityAnalysisResult.LoadFlowStatus(LoadFlowResult.ComponentResult.Status.CONVERGED, ""), 0, 0);
                 case 3 ->
-                    resultWriter.writeStateStatus(contingencyIndex, -1, SensitivityAnalysisResult.Status.FAILURE,
+                    resultWriter.writeStateStatus(contingencyIndex, -1,
                             new SensitivityAnalysisResult.LoadFlowStatus(LoadFlowResult.ComponentResult.Status.MAX_ITERATION_REACHED, ""), 0, 0);
                 case 4 ->
-                    resultWriter.writeStateStatus(contingencyIndex, -1, SensitivityAnalysisResult.Status.FAILURE,
+                    resultWriter.writeStateStatus(contingencyIndex, -1,
                             new SensitivityAnalysisResult.LoadFlowStatus(LoadFlowResult.ComponentResult.Status.FAILED, ""), 0, 0);
                 default -> throw new IllegalStateException("Unexpected value: " + resultCase);
             }
