@@ -12,6 +12,8 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.commons.json.JsonUtil;
+import com.powsybl.iidm.network.CurrentLimits;
+import com.powsybl.iidm.network.OperationalLimitsGroup;
 import com.powsybl.loadflow.LoadFlowResult;
 import org.jgrapht.alg.util.Triple;
 
@@ -759,6 +761,7 @@ public class SensitivityAnalysisResult {
      *
      * @param state the considered state.
      * @return the associated status.
+     * @deprecated Use {@link SensitivityAnalysisResult#getStateComponentStatus(SensitivityState)} instead.
      */
     @Deprecated(since = "7.4.0")
     public Status getStateStatus(SensitivityState state) {
