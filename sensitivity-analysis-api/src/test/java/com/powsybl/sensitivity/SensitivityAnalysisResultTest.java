@@ -14,6 +14,7 @@ import com.powsybl.commons.test.AbstractSerDeTest;
 import com.powsybl.contingency.BranchContingency;
 import com.powsybl.contingency.Contingency;
 import com.powsybl.contingency.ContingencyContext;
+import com.powsybl.loadflow.LoadFlowResult;
 import com.powsybl.sensitivity.json.SensitivityJsonModule;
 import org.junit.jupiter.api.Test;
 
@@ -344,7 +345,9 @@ class SensitivityAnalysisResultTest extends AbstractSerDeTest {
 
         List<Contingency> contingencies = List.of(new Contingency("NHV1_NHV2_2", new BranchContingency("NHV1_NHV2_2")));
         List<SensitivityAnalysisResult.SensitivityStateStatus> stateStatuses = new ArrayList<>();
-        contingencies.forEach(c -> stateStatuses.add(new SensitivityAnalysisResult.SensitivityStateStatus(SensitivityState.postContingency(c.getId()), SensitivityAnalysisResult.Status.SUCCESS)));
+        contingencies.forEach(c -> stateStatuses.add(new SensitivityAnalysisResult.SensitivityStateStatus(SensitivityState.postContingency(c.getId()),
+                List.of(new SensitivityAnalysisResult.SensitivityStateStatus.ComponentLoadFlowStatus(
+                        new SensitivityAnalysisResult.LoadFlowStatus(LoadFlowResult.ComponentResult.Status.CONVERGED, ""), 0, 0)))));
         List<String> contingencyIds = contingencies.stream().map(Contingency::getId).toList();
         List<String> operatorStrategyIds = Collections.emptyList();
         SensitivityAnalysisResult result = new SensitivityAnalysisResult(factors, stateStatuses, contingencyIds, operatorStrategyIds, values);

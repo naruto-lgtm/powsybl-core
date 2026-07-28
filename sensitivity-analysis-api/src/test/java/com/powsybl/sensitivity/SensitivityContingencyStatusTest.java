@@ -28,7 +28,14 @@ class SensitivityContingencyStatusTest {
         String json = """
             {
               "contingencyId": "ID_001",
-              "status": "SUCCESS"
+              "componentsLoadFlowStatuses": [
+                {
+                  "loadFlowStatus": "CONVERGED",
+                  "loadFlowStatusDescription": "TestConvergence",
+                  "numCC": 0,
+                  "numCS": 0
+                }
+              ]
             }
             """;
         try (JsonParser parser = factory.createParser(json)) {
@@ -38,7 +45,7 @@ class SensitivityContingencyStatusTest {
             assertEquals("ID_001", stateStatus.getState().contingencyId());
             assertNull(stateStatus.getState().operatorStrategyId());
             assertEquals(SensitivityAnalysisResult.Status.SUCCESS, stateStatus.getStatus());
-            assertEquals(0, stateStatus.getComponentsLoadFlowStatusList().size());
+            assertEquals(1, stateStatus.getComponentsLoadFlowStatusList().size());
         }
     }
 
@@ -47,7 +54,6 @@ class SensitivityContingencyStatusTest {
         String json = """
             {
               "contingencyId": "ID_001",
-              "status": "SUCCESS",
               "componentsLoadFlowStatuses": [
                 {
                   "loadFlowStatus": "CONVERGED",
@@ -65,12 +71,12 @@ class SensitivityContingencyStatusTest {
 
             assertEquals("ID_001", stateStatus.getState().contingencyId());
             assertEquals(1, stateStatus.getComponentsLoadFlowStatusList().size());
-            Triple<SensitivityAnalysisResult.LoadFlowStatus, Integer, Integer> triple =
+            SensitivityAnalysisResult.SensitivityStateStatus.ComponentLoadFlowStatus triple =
                     stateStatus.getComponentsLoadFlowStatusList().getFirst();
-            assertEquals(LoadFlowResult.ComponentResult.Status.CONVERGED, triple.getFirst().status());
-            assertEquals("TestConvergence", triple.getFirst().statusText());
-            assertEquals(5, triple.getSecond());
-            assertEquals(2, triple.getThird());
+            assertEquals(LoadFlowResult.ComponentResult.Status.CONVERGED, triple.status().status());
+            assertEquals("TestConvergence", triple.status().statusText());
+            assertEquals(5, triple.numCC());
+            assertEquals(2, triple.numSC());
         }
     }
 
@@ -78,7 +84,6 @@ class SensitivityContingencyStatusTest {
     void parsePreContingencyStateStatus() throws Exception {
         String json = """
             {
-              "status": "SUCCESS",
               "componentsLoadFlowStatuses": [
                 {
                   "loadFlowStatus": "CONVERGED",
@@ -96,12 +101,12 @@ class SensitivityContingencyStatusTest {
 
             assertEquals(SensitivityState.PRE_CONTINGENCY, stateStatus.getState());
             assertEquals(1, stateStatus.getComponentsLoadFlowStatusList().size());
-            Triple<SensitivityAnalysisResult.LoadFlowStatus, Integer, Integer> triple =
+            SensitivityAnalysisResult.SensitivityStateStatus.ComponentLoadFlowStatus triple =
                     stateStatus.getComponentsLoadFlowStatusList().getFirst();
-            assertEquals(LoadFlowResult.ComponentResult.Status.CONVERGED, triple.getFirst().status());
-            assertEquals("TestStatusText", triple.getFirst().statusText());
-            assertEquals(5, triple.getSecond());
-            assertEquals(2, triple.getThird());
+            assertEquals(LoadFlowResult.ComponentResult.Status.CONVERGED, triple.status().status());
+            assertEquals("TestStatusText", triple.status().statusText());
+            assertEquals(5, triple.numCC());
+            assertEquals(2, triple.numSC());
         }
     }
 }

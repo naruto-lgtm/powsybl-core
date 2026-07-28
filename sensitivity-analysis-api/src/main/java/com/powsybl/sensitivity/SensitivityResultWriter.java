@@ -48,10 +48,4 @@ public interface SensitivityResultWriter {
      */
     void writeStateStatus(int contingencyIndex, int operatorStrategyIndex, SensitivityAnalysisResult.Status status,
                           SensitivityAnalysisResult.LoadFlowStatus loadFlowStatus, int numCC, int numCS);
-
-    /**
-     * Called at the end of the computation if the computation has not been interrupted.
-     */
-    void computationComplete();
-
 }

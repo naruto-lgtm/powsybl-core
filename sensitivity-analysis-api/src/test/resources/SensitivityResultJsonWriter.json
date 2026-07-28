@@ -10,12 +10,9 @@
     "value" : 3.0,
     "functionReference" : 4.0
   } ],
-  "stateStatus" : [ {
-    "status" : "SUCCESS"
-  }, {
+  "stateStatus" : [ { }, {
     "contingencyId" : "NHV1_NHV2_2",
-    "operatorStrategyId" : "Open NHV1_NHV2_2",
-    "status" : "SUCCESS"
+    "operatorStrategyId" : "Open NHV1_NHV2_2"
   } ],
   "contingencyIds" : [ "NHV1_NHV2_2" ],
   "operatorStrategyIds" : [ "Open NHV1_NHV2_2" ],

@@ -83,6 +83,8 @@ public class SensitivityAnalysisResult {
 
     public static class SensitivityStateStatus {
 
+        public record ComponentLoadFlowStatus(LoadFlowStatus status, int numCC, int numSC) { }
+
         static final String COMPONENTS_LOADFLOW_STATUSES = "componentsLoadFlowStatuses";
         static final String LOAD_FLOW_STATUS = "loadFlowStatus";
         static final String LOAD_FLOW_STATUS_DESCRIPTION = "loadFlowStatusDescription";
@@ -91,45 +93,88 @@ public class SensitivityAnalysisResult {
 
         private final SensitivityState state;
 
-        private final Status status;
-
         /**
          * Per-component load flow status (one entry per (numCC, numCS) for which a load flow has run).
          */
-        private final List<Triple<LoadFlowStatus, Integer, Integer>> componentsLoadFlowStatusList;
+        private final List<ComponentLoadFlowStatus> componentsLoadFlowStatusList;
 
         public SensitivityState getState() {
             return state;
         }
 
+        /**
+         * @Deprecated
+         * @return
+         */
         public Status getStatus() {
-            return status;
+            if (!getComponentsLoadFlowStatusList().isEmpty()) {
+                switch (getComponentsLoadFlowStatusList().get(0).status().status) {
+                    case CONVERGED -> {
+                        return Status.SUCCESS;
+                    }
+                    case MAX_ITERATION_REACHED -> {
+                        return Status.FAILURE;
+                    }
+                    case FAILED -> {
+                        return Status.FAILURE;
+                    }
+                    case NO_CALCULATION -> {
+                        return Status.NO_IMPACT;
+                    }
+                    default -> {
+                        return Status.FAILURE;
+                    }
+                }
+            } else {
+                return Status.FAILURE;
+            }
         }
 
-        public List<Triple<LoadFlowStatus, Integer, Integer>> getComponentsLoadFlowStatusList() {
+        public List<ComponentLoadFlowStatus> getComponentsLoadFlowStatusList() {
             return componentsLoadFlowStatusList;
         }
 
-        public SensitivityStateStatus(SensitivityState state, Status status) {
+        public SensitivityStateStatus(SensitivityState state, List<ComponentLoadFlowStatus> statusList) {
             this.state = Objects.requireNonNull(state);
-            this.status = Objects.requireNonNull(status);
-            this.componentsLoadFlowStatusList = new ArrayList<>();
+            this.componentsLoadFlowStatusList = new ArrayList<>(statusList);
+        }
+
+        /**
+         * @Deprecated
+         * @return
+         */
+        public SensitivityStateStatus(SensitivityState state, Status status) {
+            this(state, List.of(new ComponentLoadFlowStatus(
+                    new LoadFlowStatus(ToLoadFlowStatus(status), ""), -1, -1)));
+        }
+
+        private static LoadFlowResult.ComponentResult.Status ToLoadFlowStatus(Status status) {
+            switch (status) {
+                case SUCCESS -> {
+                    return LoadFlowResult.ComponentResult.Status.CONVERGED;
+                }
+                case FAILURE -> {
+                    return LoadFlowResult.ComponentResult.Status.FAILED;
+                }
+                case NO_IMPACT -> {
+                    return LoadFlowResult.ComponentResult.Status.NO_CALCULATION;
+                }
+                default -> {
+                    return LoadFlowResult.ComponentResult.Status.FAILED;
+                }
+            }
         }
 
         public void addComponentLoadFlowStatus(LoadFlowStatus loadFlowStatus, int numCC, int numCS) {
-            componentsLoadFlowStatusList.add(Triple.of(loadFlowStatus, numCC, numCS));
+            componentsLoadFlowStatusList.add(new ComponentLoadFlowStatus(loadFlowStatus, numCC, numCS));
         }
 
         public static void writeJson(JsonGenerator jsonGenerator, SensitivityStateStatus stateStatus) {
-            writeJson(jsonGenerator, stateStatus.state, stateStatus.status, stateStatus.componentsLoadFlowStatusList);
+            writeJson(jsonGenerator, stateStatus.state, stateStatus.componentsLoadFlowStatusList);
         }
 
-        public static void writeJson(JsonGenerator jsonGenerator, SensitivityState state, Status status) {
-            writeJson(jsonGenerator, state, status, Collections.emptyList());
-        }
-
-        public static void writeJson(JsonGenerator jsonGenerator, SensitivityState state, Status status,
-                                     List<Triple<LoadFlowStatus, Integer, Integer>> componentsLoadFlowStatusList) {
+        public static void writeJson(JsonGenerator jsonGenerator, SensitivityState state,
+                                     List<ComponentLoadFlowStatus> componentsLoadFlowStatusList) {
             try {
                 jsonGenerator.writeStartObject();
                 if (state.contingencyId() != null) {
@@ -138,15 +183,14 @@ public class SensitivityAnalysisResult {
                 if (state.operatorStrategyId() != null) {
                     jsonGenerator.writeStringField("operatorStrategyId", state.operatorStrategyId());
                 }
-                jsonGenerator.writeStringField("status", status.name());
                 if (componentsLoadFlowStatusList != null && !componentsLoadFlowStatusList.isEmpty()) {
                     jsonGenerator.writeArrayFieldStart(COMPONENTS_LOADFLOW_STATUSES);
-                    for (Triple<LoadFlowStatus, Integer, Integer> componentLoadFlowStatus : componentsLoadFlowStatusList) {
+                    for (ComponentLoadFlowStatus componentLoadFlowStatus : componentsLoadFlowStatusList) {
                         jsonGenerator.writeStartObject();
-                        jsonGenerator.writeStringField(LOAD_FLOW_STATUS, componentLoadFlowStatus.getFirst().status.toString());
-                        jsonGenerator.writeStringField(LOAD_FLOW_STATUS_DESCRIPTION, componentLoadFlowStatus.getFirst().statusText);
-                        jsonGenerator.writeNumberField(NUM_CC, componentLoadFlowStatus.getSecond());
-                        jsonGenerator.writeNumberField(NUM_CS, componentLoadFlowStatus.getThird());
+                        jsonGenerator.writeStringField(LOAD_FLOW_STATUS, componentLoadFlowStatus.status().status().toString());
+                        jsonGenerator.writeStringField(LOAD_FLOW_STATUS_DESCRIPTION, componentLoadFlowStatus.status().statusText());
+                        jsonGenerator.writeNumberField(NUM_CC, componentLoadFlowStatus.numCC());
+                        jsonGenerator.writeNumberField(NUM_CS, componentLoadFlowStatus.numSC());
                         jsonGenerator.writeEndObject();
                     }
                     jsonGenerator.writeEndArray();
@@ -161,7 +205,7 @@ public class SensitivityAnalysisResult {
             private String contingencyId;
             private String operatorStrategyId;
             private Status status;
-            private List<Triple<LoadFlowStatus, Integer, Integer>> componentsLoadFlowStatusList;
+            private List<SensitivityAnalysisResult.SensitivityStateStatus.ComponentLoadFlowStatus> componentsLoadFlowStatusList;
         }
 
         public static SensitivityStateStatus parseJson(JsonParser parser, String version) {
@@ -174,15 +218,14 @@ public class SensitivityAnalysisResult {
                     if (token == JsonToken.FIELD_NAME) {
                         parseJson(parser, context, version == null ? VERSION : version);
                     } else if (token == JsonToken.END_OBJECT) {
-                        SensitivityStateStatus stateStatus = new SensitivityStateStatus(
-                                new SensitivityState(context.contingencyId, context.operatorStrategyId),
-                                context.status);
-                        if (context.componentsLoadFlowStatusList != null) {
-                            for (Triple<LoadFlowStatus, Integer, Integer> triple : context.componentsLoadFlowStatusList) {
-                                stateStatus.addComponentLoadFlowStatus(triple.getFirst(), triple.getSecond(), triple.getThird());
-                            }
+                        if (version != null && version.compareTo("1.1") <= 0) {
+                            return new SensitivityStateStatus(
+                                    new SensitivityState(context.contingencyId, context.operatorStrategyId), context.status);
+                        } else {
+                            return new SensitivityStateStatus(
+                                    new SensitivityState(context.contingencyId, context.operatorStrategyId),
+                                    context.componentsLoadFlowStatusList != null ? context.componentsLoadFlowStatusList : Collections.emptyList());
                         }
-                        return stateStatus;
                     }
                 }
             } catch (IOException e) {
@@ -209,7 +252,7 @@ public class SensitivityAnalysisResult {
                     context.status = Status.valueOf(parser.getValueAsString());
                     break;
                 case "status":
-                    JsonUtil.assertGreaterOrEqualThanReferenceVersion(CONTEXT_NAME, "Tag: status", version, "1.1");
+                    JsonUtil.assertLessThanOrEqualToReferenceVersion(CONTEXT_NAME, "Tag: status", version, "1.1");
                     parser.nextToken();
                     context.status = Status.valueOf(parser.getValueAsString());
                     break;
@@ -222,11 +265,11 @@ public class SensitivityAnalysisResult {
             }
         }
 
-        private static List<Triple<LoadFlowStatus, Integer, Integer>> parseComponentLoadFlowStatuses(JsonParser parser) throws IOException {
+        private static List<SensitivityAnalysisResult.SensitivityStateStatus.ComponentLoadFlowStatus> parseComponentLoadFlowStatuses(JsonParser parser) throws IOException {
             if (parser.nextToken() != JsonToken.START_ARRAY) {
                 throw new PowsyblException("Expected start of array for component loadflow statuses");
             }
-            List<Triple<LoadFlowStatus, Integer, Integer>> statuses = new ArrayList<>();
+            List<SensitivityAnalysisResult.SensitivityStateStatus.ComponentLoadFlowStatus> statuses = new ArrayList<>();
             while (parser.nextToken() != JsonToken.END_ARRAY) {
                 if (parser.currentToken() == JsonToken.START_OBJECT) {
                     statuses.add(parseSingleComponentStatus(parser));
@@ -235,7 +278,7 @@ public class SensitivityAnalysisResult {
             return statuses;
         }
 
-        private static Triple<LoadFlowStatus, Integer, Integer> parseSingleComponentStatus(JsonParser parser) throws IOException {
+        private static SensitivityAnalysisResult.SensitivityStateStatus.ComponentLoadFlowStatus parseSingleComponentStatus(JsonParser parser) throws IOException {
             String statusStr = null;
             String descStr = null;
             int numCC = 0;
@@ -252,7 +295,7 @@ public class SensitivityAnalysisResult {
                 }
             }
             LoadFlowStatus lfs = new LoadFlowStatus(LoadFlowResult.ComponentResult.Status.valueOf(statusStr), descStr);
-            return Triple.of(lfs, numCC, numCS);
+            return new SensitivityAnalysisResult.SensitivityStateStatus.ComponentLoadFlowStatus(lfs, numCC, numCS);
         }
     }
 

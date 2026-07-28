@@ -100,9 +100,4 @@ public class SensitivityResultCsvWriter implements SensitivityResultWriter {
             throw new UncheckedIOException(e);
         }
     }
-
-    @Override
-    public void computationComplete() {
-        // No-op for CSV: rows are streamed as they are written.
-    }
 }

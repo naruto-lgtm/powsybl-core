@@ -124,7 +124,6 @@ class SensitivityAnalysisTest {
                 .setComputationManager(computationManager)
                 .setReportNode(ReportNode.NO_OP));
         assertEquals(1, resultWriter.getValues().size());
-        assertTrue(resultWriter.isComputationComplete());
     }
 
     @Test
@@ -213,34 +212,29 @@ class SensitivityAnalysisTest {
             int resultCase = contingencyIndex % 5;
             switch (resultCase) {
                 case 0:
-                    assertEquals(SensitivityAnalysisResult.Status.SUCCESS, stateStatus.getStatus());
-                    assertEquals(LoadFlowResult.ComponentResult.Status.CONVERGED, componentLoadFlowStatus.getFirst().status());
-                    assertEquals(0, componentLoadFlowStatus.getSecond());
-                    assertEquals(0, componentLoadFlowStatus.getThird());
+                    assertEquals(LoadFlowResult.ComponentResult.Status.CONVERGED, componentLoadFlowStatus.status().status());
+                    assertEquals(0, componentLoadFlowStatus.numCC());
+                    assertEquals(0, componentLoadFlowStatus.numSC());
                     break;
                 case 1:
-                    assertEquals(SensitivityAnalysisResult.Status.SUCCESS, stateStatus.getStatus());
-                    assertEquals(LoadFlowResult.ComponentResult.Status.NO_CALCULATION, componentLoadFlowStatus.getFirst().status());
-                    assertEquals(0, componentLoadFlowStatus.getSecond());
-                    assertEquals(0, componentLoadFlowStatus.getThird());
+                    assertEquals(LoadFlowResult.ComponentResult.Status.NO_CALCULATION, componentLoadFlowStatus.status().status());
+                    assertEquals(0, componentLoadFlowStatus.numCC());
+                    assertEquals(0, componentLoadFlowStatus.numSC());
                     break;
                 case 2:
-                    assertEquals(SensitivityAnalysisResult.Status.NO_IMPACT, stateStatus.getStatus());
-                    assertEquals(LoadFlowResult.ComponentResult.Status.CONVERGED, componentLoadFlowStatus.getFirst().status());
-                    assertEquals(0, componentLoadFlowStatus.getSecond());
-                    assertEquals(0, componentLoadFlowStatus.getThird());
+                    assertEquals(LoadFlowResult.ComponentResult.Status.CONVERGED, componentLoadFlowStatus.status().status());
+                    assertEquals(0, componentLoadFlowStatus.numCC());
+                    assertEquals(0, componentLoadFlowStatus.numSC());
                     break;
                 case 3:
-                    assertEquals(SensitivityAnalysisResult.Status.FAILURE, stateStatus.getStatus());
-                    assertEquals(LoadFlowResult.ComponentResult.Status.MAX_ITERATION_REACHED, componentLoadFlowStatus.getFirst().status());
-                    assertEquals(0, componentLoadFlowStatus.getSecond());
-                    assertEquals(0, componentLoadFlowStatus.getThird());
+                    assertEquals(LoadFlowResult.ComponentResult.Status.MAX_ITERATION_REACHED, componentLoadFlowStatus.status().status());
+                    assertEquals(0, componentLoadFlowStatus.numCC());
+                    assertEquals(0, componentLoadFlowStatus.numSC());
                     break;
                 case 4:
-                    assertEquals(SensitivityAnalysisResult.Status.FAILURE, stateStatus.getStatus());
-                    assertEquals(LoadFlowResult.ComponentResult.Status.FAILED, componentLoadFlowStatus.getFirst().status());
-                    assertEquals(0, componentLoadFlowStatus.getSecond());
-                    assertEquals(0, componentLoadFlowStatus.getThird());
+                    assertEquals(LoadFlowResult.ComponentResult.Status.FAILED, componentLoadFlowStatus.status().status());
+                    assertEquals(0, componentLoadFlowStatus.numCC());
+                    assertEquals(0, componentLoadFlowStatus.numSC());
                     break;
                 default:
                     fail();

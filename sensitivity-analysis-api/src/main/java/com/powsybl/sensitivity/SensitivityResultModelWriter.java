@@ -26,8 +26,6 @@ public class SensitivityResultModelWriter implements SensitivityResultWriter {
 
     private final Map<SensitivityState, SensitivityAnalysisResult.SensitivityStateStatus> stateStatuses = new LinkedHashMap<>();
 
-    private boolean computationComplete;
-
     public SensitivityResultModelWriter(List<Contingency> contingencies, List<OperatorStrategy> operatorStrategies) {
         this.contingencies = Objects.requireNonNull(contingencies);
         this.operatorStrategies = Objects.requireNonNull(operatorStrategies);
@@ -39,10 +37,6 @@ public class SensitivityResultModelWriter implements SensitivityResultWriter {
 
     public List<SensitivityAnalysisResult.SensitivityStateStatus> getStateStatuses() {
         return new ArrayList<>(stateStatuses.values());
-    }
-
-    public boolean isComputationComplete() {
-        return computationComplete;
     }
 
     @Override
@@ -57,14 +51,9 @@ public class SensitivityResultModelWriter implements SensitivityResultWriter {
                 contingencyIndex != -1 ? contingencies.get(contingencyIndex).getId() : null,
                 operatorStrategyIndex != -1 ? operatorStrategies.get(operatorStrategyIndex).getId() : null);
         SensitivityAnalysisResult.SensitivityStateStatus stateStatus = stateStatuses.computeIfAbsent(
-                state, k -> new SensitivityAnalysisResult.SensitivityStateStatus(k, status));
+                state, k -> new SensitivityAnalysisResult.SensitivityStateStatus(k, Collections.emptyList()));
         if (loadFlowStatus != null) {
             stateStatus.addComponentLoadFlowStatus(loadFlowStatus, numCC, numCS);
         }
-    }
-
-    @Override
-    public void computationComplete() {
-        computationComplete = true;
     }
 }
