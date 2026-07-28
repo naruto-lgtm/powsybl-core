@@ -287,7 +287,6 @@ class SensitivityAnalysisToolTest extends AbstractToolTest {
                 .findFirst()
                 .orElseThrow();
         assertNull(postStatus.getState().operatorStrategyId());
-        assertEquals(SensitivityAnalysisResult.Status.SUCCESS, postStatus.getStatus());
         assertEquals(1, preStatus.getComponentsLoadFlowStatusList().size());
         SensitivityAnalysisResult.SensitivityStateStatus.ComponentStatus preComponent = preStatus.getComponentsLoadFlowStatusList().getFirst();
         assertEquals(LoadFlowResult.ComponentResult.Status.CONVERGED, preComponent.status().status());

@@ -102,10 +102,7 @@ public class SensitivityAnalysisResult {
             return state;
         }
 
-        /**
-         * @Deprecated
-         * @return
-         */
+        @Deprecated(since = "7.4.0")
         public Status getStatus() {
             if (!getComponentsLoadFlowStatusList().isEmpty()) {
                 switch (getComponentsLoadFlowStatusList().get(0).status().status) {
@@ -133,10 +130,7 @@ public class SensitivityAnalysisResult {
             this.componentsLoadFlowStatusList = new ArrayList<>(statusList);
         }
 
-        /**
-         * @Deprecated
-         * @return
-         */
+        @Deprecated(since = "7.4.0")
         public SensitivityStateStatus(SensitivityState state, Status status) {
             this(state, List.of(new ComponentStatus(
                     new LoadFlowStatus(toLoadFlowStatus(status), ""), -1, -1)));
@@ -766,8 +760,20 @@ public class SensitivityAnalysisResult {
      * @param state the considered state.
      * @return the associated status.
      */
+    @Deprecated(since = "7.4.0")
     public Status getStateStatus(SensitivityState state) {
         Objects.requireNonNull(state);
         return statusByState.get(state).getStatus();
+    }
+
+    /**
+     * Get the status associated to a state for all components
+     *
+     * @param state the considered state.
+     * @return the components' status.
+     */
+    public List<SensitivityStateStatus.ComponentStatus> getStateComponentStatus(SensitivityState state) {
+        Objects.requireNonNull(state);
+        return statusByState.get(state).getComponentsLoadFlowStatusList();
     }
 }

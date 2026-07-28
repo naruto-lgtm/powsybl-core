@@ -43,7 +43,7 @@ class SensitivityContingencyStatusTest {
                     SensitivityAnalysisResult.SensitivityStateStatus.parseJson(parser, "1.2");
             assertEquals("ID_001", stateStatus.getState().contingencyId());
             assertNull(stateStatus.getState().operatorStrategyId());
-            assertEquals(SensitivityAnalysisResult.Status.SUCCESS, stateStatus.getStatus());
+            assertEquals(LoadFlowResult.ComponentResult.Status.CONVERGED, stateStatus.getComponentsLoadFlowStatusList().getFirst().status().status());
             assertEquals(1, stateStatus.getComponentsLoadFlowStatusList().size());
         }
     }

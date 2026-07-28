@@ -103,8 +103,8 @@ class SensitivityAnalysisResultTest extends AbstractSerDeTest {
         assertEquals(4d, result.getBranchCurrent1FunctionReferenceValue("l2"), 0d);
         assertEquals(3, result.getPreContingencyValues().size());
 
-        assertEquals(SensitivityAnalysisResult.Status.SUCCESS, result.getStateStatus(new SensitivityState("NHV1_NHV2_2", null)));
-        assertEquals(SensitivityAnalysisResult.Status.NO_IMPACT, result.getStateStatus(new SensitivityState("NHV2_NHV3", null)));
+        assertEquals(LoadFlowResult.ComponentResult.Status.CONVERGED, result.getStateComponentStatus(new SensitivityState("NHV1_NHV2_2", null)).get(0).status().status());
+        assertEquals(LoadFlowResult.ComponentResult.Status.NO_CALCULATION, result.getStateComponentStatus(new SensitivityState("NHV2_NHV3", null)).get(0).status().status());
     }
 
     @Test

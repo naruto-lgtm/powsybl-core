@@ -41,7 +41,6 @@ public interface SensitivityResultWriter {
      *
      * @param contingencyIndex the contingency index, -1 for pre-contingency state
      * @param operatorStrategyIndex the operator strategy index, -1 if none
-     * @param status the sensitivity analysis status
      * @param loadFlowStatus the load flow status for this component
      * @param numCC index of connected component, -1 if not applicable
      * @param numCS index of synchronous component, -1 if not applicable
