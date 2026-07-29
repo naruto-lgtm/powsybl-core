@@ -51,8 +51,7 @@ public class SensitivityResultModelWriter implements SensitivityResultWriter {
         SensitivityState state = new SensitivityState(
                 contingencyIndex != -1 ? contingencies.get(contingencyIndex).getId() : null,
                 operatorStrategyIndex != -1 ? operatorStrategies.get(operatorStrategyIndex).getId() : null);
-        SensitivityAnalysisResult.SensitivityStateStatus stateStatus = stateStatuses.computeIfAbsent(
-                state, k -> new SensitivityAnalysisResult.SensitivityStateStatus(k, Collections.emptyList()));
-        stateStatus.addComponentLoadFlowStatus(loadFlowStatus, numCC, numCS);
+        stateStatuses.computeIfAbsent(state, SensitivityAnalysisResult.SensitivityStateStatus::new)
+                .addComponentLoadFlowStatus(loadFlowStatus, numCC, numCS);
     }
 }

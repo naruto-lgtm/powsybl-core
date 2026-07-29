@@ -67,6 +67,8 @@ public class SensitivityAnalysisResult {
 
     private final Map<SensitivityState, SensitivityStateStatus> statusByState = new HashMap<>();
 
+    private final boolean computationComplete;
+
     /**
      * The load flow status reported for a given component.
      * @param status the load flow component status
@@ -130,6 +132,10 @@ public class SensitivityAnalysisResult {
             this.componentsLoadFlowStatusList = new ArrayList<>(statusList);
         }
 
+        public SensitivityStateStatus(SensitivityState state) {
+            this(state, Collections.emptyList());
+        }
+
         @Deprecated(since = "7.4.0")
         public SensitivityStateStatus(SensitivityState state, Status status) {
             this(state, List.of(new ComponentStatus(
@@ -150,8 +156,14 @@ public class SensitivityAnalysisResult {
             }
         }
 
-        public void addComponentLoadFlowStatus(LoadFlowStatus loadFlowStatus, int numCC, int numCS) {
+        public SensitivityStateStatus addComponentLoadFlowStatus(LoadFlowStatus loadFlowStatus, int numCC, int numCS) {
             componentsLoadFlowStatusList.add(new ComponentStatus(loadFlowStatus, numCC, numCS));
+            return this;
+        }
+
+        public SensitivityStateStatus addComponentLoadFlowStatus(LoadFlowResult.ComponentResult.Status status, int numCC, int numCS) {
+            componentsLoadFlowStatusList.add(new ComponentStatus(new LoadFlowStatus(status, ""), numCC, numCS));
+            return this;
         }
 
         public static void writeJson(JsonGenerator jsonGenerator, SensitivityStateStatus stateStatus) {
@@ -294,6 +306,20 @@ public class SensitivityAnalysisResult {
      */
     public SensitivityAnalysisResult(List<SensitivityFactor> factors, List<SensitivityStateStatus> stateStatuses, List<String> contingencyIds,
                                      List<String> operatorStrategyIds, List<SensitivityValue> values) {
+        this(factors, stateStatuses, contingencyIds, operatorStrategyIds, values, true);
+    }
+
+    /**
+     * Sensitivity analysis result
+     * @param factors the list of sensitivity factors that have been computed.
+     * @param stateStatuses the list of states and their associated computation status.
+     * @param contingencyIds the list of contingency IDs that have been considered during the sensitivity analysis.
+     * @param operatorStrategyIds the list of operator strategy IDs that have been considered during the sensitivity analysis.
+     * @param values result values of the sensitivity analysis in pre-contingency state and post-contingency states.
+     * @param computationComplete whether the sensitivity computation fully or partially completed
+     */
+    public SensitivityAnalysisResult(List<SensitivityFactor> factors, List<SensitivityStateStatus> stateStatuses, List<String> contingencyIds,
+                                     List<String> operatorStrategyIds, List<SensitivityValue> values, boolean computationComplete) {
         this.factors = Collections.unmodifiableList(Objects.requireNonNull(factors));
         this.stateStatuses = Collections.unmodifiableList(Objects.requireNonNull(stateStatuses));
         this.contingencyIds = Collections.unmodifiableList(Objects.requireNonNull(contingencyIds));
@@ -313,6 +339,7 @@ public class SensitivityAnalysisResult {
         for (SensitivityStateStatus stateStatus : stateStatuses) {
             this.statusByState.put(stateStatus.getState(), stateStatus);
         }
+        this.computationComplete = computationComplete;
     }
 
     /**
@@ -776,5 +803,13 @@ public class SensitivityAnalysisResult {
     public List<SensitivityStateStatus.ComponentStatus> getStateComponentStatus(SensitivityState state) {
         Objects.requireNonNull(state);
         return statusByState.get(state).getComponentsLoadFlowStatusList();
+    }
+
+    /**
+     * Return true if the computation was fully completed, false if it was partially completed
+     * @return the computation complete boolean
+     */
+    public boolean isComputationComplete() {
+        return computationComplete;
     }
 }
